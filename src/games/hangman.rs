@@ -1,14 +1,21 @@
 use std::vec;
 
-use rand::Rng;
+use rand::{seq::SliceRandom, Rng};
 
-struct PlayerCards {
-    card_type: String,
-    number: usize,
+#[derive(Debug)]
+enum CardType {
+    Number,
+    Joker,
 }
 
+#[derive(Debug)]
+struct PlayerCard {
+    card_type: CardType,
+    number: usize,
+}
+#[derive(Debug)]
 struct Player {
-    cards: Vec<PlayerCards>,
+    cards: Vec<PlayerCard>,
     counter: usize,
 }
 
@@ -20,7 +27,7 @@ pub struct Hangman {
     // steps towards HANGMAN
     required_steps: usize,
     // info of each players
-    // players: (Player, Player),
+    players: (Player, Player),
 }
 
 impl Default for Hangman {
@@ -33,12 +40,53 @@ impl Default for Hangman {
         let init_joker = default_jokers[rng.gen_range(0..default_jokers.len())];
         println!("joker this round: {}", init_joker);
         // shuffle cards
-        let init_cards: Vec<_> = default_cards.into_iter().flat_map(|x| vec![x, x]).collect();
-
+        let mut init_cards: Vec<_> = default_cards
+            .into_iter()
+            .flat_map(|x| {
+                vec![
+                    PlayerCard {
+                        card_type: CardType::Number,
+                        number: x,
+                    },
+                    PlayerCard {
+                        card_type: CardType::Number,
+                        number: x,
+                    },
+                ]
+            })
+            .collect();
+        init_cards.push(PlayerCard {
+            card_type: CardType::Joker,
+            number: init_joker,
+        });
+        init_cards.shuffle(&mut rng);
+        // assign cards to players;
+        let index_of_first_action_player: usize = rng.gen_range(0..=1);
+        println!(
+            "who is going first? player{:?}",
+            index_of_first_action_player + 1
+        );
+        let cards_of_first_player: usize = match index_of_first_action_player {
+            0 => 11,
+            _ => 10,
+        };
+        let player2_cards = init_cards.split_off(cards_of_first_player);
+        println!("cards of player1: {:?}", init_cards);
+        println!("cards of player2: {:?}", player2_cards);
         return Hangman {
             jokers: default_jokers,
             cards: vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
             required_steps: default_steps,
+            players: (
+                Player {
+                    counter: default_steps,
+                    cards: init_cards,
+                },
+                Player {
+                    counter: default_steps,
+                    cards: player2_cards,
+                },
+            ),
         };
     }
 }
