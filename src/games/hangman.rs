@@ -41,6 +41,7 @@ impl Default for Hangman {
         println!("joker this round: {}", init_joker);
         // shuffle cards
         let mut init_cards: Vec<_> = default_cards
+            .clone()
             .into_iter()
             .flat_map(|x| {
                 vec![
@@ -67,15 +68,15 @@ impl Default for Hangman {
             index_of_first_action_player + 1
         );
         let cards_of_first_player: usize = match index_of_first_action_player {
-            0 => 11,
-            _ => 10,
+            0 => default_cards.len() + 1,
+            _ => default_cards.len(),
         };
         let player2_cards = init_cards.split_off(cards_of_first_player);
         println!("cards of player1: {:?}", init_cards);
         println!("cards of player2: {:?}", player2_cards);
         return Hangman {
             jokers: default_jokers,
-            cards: vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            cards: default_cards,
             required_steps: default_steps,
             players: (
                 Player {
