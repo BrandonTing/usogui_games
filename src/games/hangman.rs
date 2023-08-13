@@ -1,4 +1,4 @@
-use std::vec;
+use std::{collections::HashMap, vec};
 
 use rand::{seq::SliceRandom, Rng};
 
@@ -30,11 +30,37 @@ pub struct Hangman {
     players: (Player, Player),
 }
 
+fn remove_cards_with_duplication(cards: Vec<PlayerCard>) -> Vec<PlayerCard> {
+    // create a hashmap to use unique number as key
+    let mut count_map: HashMap<usize, usize> = HashMap::new();
+
+    // Count the occurrences of each number
+    for card in &cards {
+        match card.card_type {
+            CardType::Number => {
+                let count = count_map.entry(card.number).or_insert(0);
+                *count += 1;
+            }
+            _ => println!("don't count these numbers"),
+        }
+    }
+
+    // Filter out the numbers that appear more than once
+    let result: Vec<_> = cards
+        .into_iter()
+        .filter(|card| match card.card_type {
+            CardType::Number => count_map[&card.number] == 1,
+            CardType::Joker => return true,
+        })
+        .collect();
+    println!("{:?}", result);
+    return result;
+}
+
 fn new_hangman_game(
     joker_options: &Vec<usize>,
     card_options: &Vec<usize>,
-    steps: usize,
-) -> (Player, Player) {
+) -> (Vec<PlayerCard>, Vec<PlayerCard>) {
     let mut rng: rand::rngs::ThreadRng = rand::thread_rng();
 
     let init_joker = joker_options[rng.gen_range(0..joker_options.len())];
@@ -72,17 +98,11 @@ fn new_hangman_game(
         _ => card_options.len(),
     };
     let player2_cards = init_cards.split_off(cards_of_first_player);
-    println!("cards of player1: {:?}", init_cards);
+    println!("cards of player1 before drop duplication: {:?}", init_cards);
     println!("cards of player2: {:?}", player2_cards);
     return (
-        Player {
-            counter: steps,
-            cards: init_cards,
-        },
-        Player {
-            counter: steps,
-            cards: player2_cards,
-        },
+        remove_cards_with_duplication(init_cards),
+        remove_cards_with_duplication(player2_cards),
     );
 }
 
@@ -91,13 +111,22 @@ impl Default for Hangman {
         let default_jokers = vec![1, 2, 3, 4, 5];
         let default_cards = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         let default_steps: usize = 11;
-        let players = new_hangman_game(&default_jokers, &default_cards, default_steps);
+        let (player1_card, player2_card) = new_hangman_game(&default_jokers, &default_cards);
 
         return Hangman {
             jokers: default_jokers,
             cards: default_cards,
             required_steps: default_steps,
-            players: players,
+            players: (
+                Player {
+                    cards: player1_card,
+                    counter: default_steps,
+                },
+                Player {
+                    cards: player2_card,
+                    counter: default_steps,
+                },
+            ),
         };
     }
 }
