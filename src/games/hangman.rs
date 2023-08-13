@@ -53,7 +53,6 @@ fn remove_cards_with_duplication(cards: Vec<PlayerCard>) -> Vec<PlayerCard> {
             CardType::Joker => return true,
         })
         .collect();
-    println!("{:?}", result);
     return result;
 }
 
@@ -98,8 +97,6 @@ fn new_hangman_game(
         _ => card_options.len(),
     };
     let player2_cards = init_cards.split_off(cards_of_first_player);
-    println!("cards of player1 before drop duplication: {:?}", init_cards);
-    println!("cards of player2: {:?}", player2_cards);
     return (
         remove_cards_with_duplication(init_cards),
         remove_cards_with_duplication(player2_cards),
