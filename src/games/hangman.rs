@@ -3,31 +3,31 @@ use std::{collections::HashMap, vec};
 use rand::{seq::SliceRandom, Rng};
 
 #[derive(Debug)]
-enum CardType {
+pub enum CardType {
     Number,
     Joker,
 }
 
 #[derive(Debug)]
-struct PlayerCard {
-    card_type: CardType,
-    number: usize,
+pub struct PlayerCard {
+    pub card_type: CardType,
+    pub number: usize,
 }
 #[derive(Debug)]
-struct Player {
-    cards: Vec<PlayerCard>,
-    counter: usize,
+pub struct Player {
+    pub cards: Vec<PlayerCard>,
+    pub counter: usize,
 }
 
 pub struct Hangman {
     // options of numbers on joker card.
-    jokers: Vec<usize>,
+    pub jokers: Vec<usize>,
     // options of numbers on cards.
-    cards: Vec<usize>,
+    pub cards: Vec<usize>,
     // steps towards HANGMAN
-    required_steps: usize,
+    pub required_steps: usize,
     // info of each players
-    players: (Player, Player),
+    pub players: (Player, Player),
 }
 
 fn remove_cards_with_duplication(cards: Vec<PlayerCard>) -> Vec<PlayerCard> {

@@ -1,25 +1,31 @@
 mod games;
-use games::{game::Game, hangman::Hangman};
-use inquire::{
-    validator::{self, Validation},
-    Select, Text,
-};
+
+use games::game::Game;
+use inquire::Select;
+use strum::IntoEnumIterator;
 
 fn main() {
-    // // init new hangman game
-    // Hangman::default();
+    let mut game_options: Vec<_> = Game::iter().map(|x| x.to_string()).collect();
+    let cancel_option = "Actually I don't want to play.";
+    game_options.push(cancel_option.to_string());
 
-    // TODO gen option from game lists
-    let game = Select::new(
-        "choose ur game to play",
-        vec!["Hangman", "Actually I don't want to play."],
-    )
-    .prompt();
+    // gen option from game lists
+    let game_select = Select::new("choose ur game to play", game_options).prompt();
 
-    match game {
+    match game_select {
         Ok(game) => match game {
-            "Actually I don't want to play." => println!("player dropped "),
-            _ => println!("The game u choose is: {}", game),
+            _ => {
+                if let Some(enum_value) = Game::from_str(&game) {
+                    match enum_value {
+                        // TODO start a new game
+                        Game::Hangman => println!("Matched Hangman"),
+                    }
+                } else if game == cancel_option.to_string() {
+                    println!("Player canceled");
+                } else {
+                    println!("No matching Game found.");
+                }
+            }
         },
         Err(err) => println!("Error while publishing your status: {}", err),
     }
