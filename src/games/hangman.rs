@@ -41,7 +41,8 @@ fn remove_cards_with_duplication(cards: Vec<PlayerCard>) -> Vec<PlayerCard> {
                 let count = count_map.entry(card.number).or_insert(0);
                 *count += 1;
             }
-            _ => println!("don't count these numbers"),
+            // Ignore joker
+            _ => (),
         }
     }
 
@@ -127,3 +128,8 @@ impl Default for Hangman {
         };
     }
 }
+
+// TODO Draw cards
+// impl Hangman {
+//     fn d
+// }

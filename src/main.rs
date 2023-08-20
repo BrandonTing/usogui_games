@@ -1,35 +1,44 @@
 mod games;
 
-use games::{game::Game, hangman::Hangman};
+use games::{
+    game::{Game, GameName, GetPlayers},
+    hangman::Hangman,
+};
 use inquire::Select;
 use strum::IntoEnumIterator;
 
 fn main() {
-    let mut game_options: Vec<_> = Game::iter().map(|x| x.to_string()).collect();
-    let cancel_option = "Actually I don't want to play.";
-    game_options.push(cancel_option.to_string());
+    let game_options: Vec<_> = GameName::iter().map(|x| x.to_string()).collect();
 
     // gen option from game lists
     let game_select = Select::new("choose ur game to play", game_options).prompt();
 
-    match game_select {
-        Ok(game) => match game {
-            _ => {
-                if let Some(enum_value) = Game::from_str(&game) {
-                    match enum_value {
-                        // TODO start a new game
-                        Game::Hangman => {
-                            let new_game = Hangman::default();
-                            println!("new hang game started")
-                        }
+    let selected_game = match game_select {
+        // FIXME is this necessary?
+        Ok(game) => {
+            if let Some(game_name) = GameName::from_str(&game) {
+                match game_name {
+                    GameName::Hangman => {
+                        println!("new hangman game started");
+                        Ok(Game::Hangman(Hangman::default()))
                     }
-                } else if game == cancel_option.to_string() {
-                    println!("Player canceled");
-                } else {
-                    println!("No matching Game found.");
                 }
+            } else {
+                println!("no matching game");
+                Err(())
             }
-        },
-        Err(err) => println!("Error while publishing your status: {}", err),
-    }
+        }
+        Err(err) => {
+            println!("Error while getting the game: {}", err);
+            Err(())
+        }
+    };
+    let selected_game = selected_game.unwrap();
+    let players = selected_game.get_players();
+    println!(
+        "You are player 1, these are your cards: {:?}",
+        players.0.cards
+    );
+    println!("These are your opponent's cards: {:?}", players.1.cards);
+    // TODO Draw cards
 }
