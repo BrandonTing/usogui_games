@@ -44,3 +44,15 @@ impl GetPlayers for Game {
         }
     }
 }
+
+pub trait Play {
+    fn play(&mut self) -> ();
+}
+
+impl Play for Game {
+    fn play(&mut self) -> () {
+        match self {
+            Game::Hangman(hangman) => hangman.play(),
+        }
+    }
+}
