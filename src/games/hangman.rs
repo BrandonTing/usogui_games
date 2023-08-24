@@ -197,8 +197,58 @@ impl Hangman {
         // if counts <= 0, the other win;
         // return play next round
         if remove_duplicated_from.len() == 0 || remove_duplicated_to.len() == 0 {
-            //
-            println!("game end")
+            let player_win = (remove_duplicated_from.len() == 0 && !player_draw)
+                || (remove_duplicated_to.len() == 0 && player_draw);
+
+            remove_duplicated_from.append(&mut remove_duplicated_to);
+            let joker_number: usize = remove_duplicated_from.get(0).unwrap().number;
+            match player_win {
+                true => {
+                    println!("You Win!");
+                    if self.players.1.counter <= joker_number {
+                        println!("NPC become HANGMAN");
+                        return;
+                    }
+                    let counter = self.players.1.counter - joker_number;
+
+                    let new_game = Hangman::default();
+                    let current_player_counter = self.players.0.counter;
+
+                    self.players = (
+                        Player {
+                            cards: new_game.players.0.cards,
+                            counter: current_player_counter,
+                        },
+                        Player {
+                            cards: new_game.players.1.cards,
+                            counter: counter,
+                        },
+                    );
+                    Hangman::play(self);
+                }
+                false => {
+                    println!("You lose......");
+                    if self.players.0.counter <= joker_number {
+                        println!("You become HANGMAN");
+                        return;
+                    }
+                    let counter: usize = self.players.0.counter - joker_number;
+                    let new_game = Hangman::default();
+                    let current_npc_counter = self.players.1.counter;
+
+                    self.players = (
+                        Player {
+                            cards: new_game.players.0.cards,
+                            counter: counter,
+                        },
+                        Player {
+                            cards: new_game.players.1.cards,
+                            counter: current_npc_counter,
+                        },
+                    );
+                    Hangman::play(self);
+                }
+            }
         } else {
             remove_duplicated_from.shuffle(&mut rng);
             remove_duplicated_to.shuffle(&mut rng);
