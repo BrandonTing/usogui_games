@@ -157,12 +157,13 @@ fn get_values_of_cards(cards: &Vec<PlayerCard>) -> Vec<String> {
 }
 
 impl Hangman {
-    fn draw(&mut self, player_draw: bool, selected_index: usize) -> bool {
+    fn draw(&mut self, player_draw: bool, selected_index: usize) {
         let (from, to) = match player_draw {
             true => (&self.players.1.cards, &mut self.players.0.cards),
             false => (&self.players.0.cards, &mut self.players.1.cards),
         };
-        println!("{:?}", from);
+        println!("from: {:?}", from);
+        println!("selected_index: {:?}", selected_index);
         let new_card = from.get(selected_index - 1).unwrap();
         to.push(PlayerCard {
             card_type: new_card.card_type,
@@ -189,51 +190,60 @@ impl Hangman {
         let mut remove_duplicated_from = remove_cards_with_duplication(updated_from.to_vec());
         let mut remove_duplicated_to = remove_cards_with_duplication(to.to_vec());
 
-        remove_duplicated_from.shuffle(&mut rng);
-        remove_duplicated_to.shuffle(&mut rng);
-
-        // update players
-        match player_draw {
-            true => {
-                self.players = (
-                    Player {
-                        counter: self.players.0.counter,
-                        cards: remove_duplicated_to,
-                    },
-                    Player {
-                        counter: self.players.1.counter,
-                        cards: remove_duplicated_from,
-                    },
-                );
-            }
-            false => {
-                self.players = (
-                    Player {
-                        counter: self.players.0.counter,
-                        cards: remove_duplicated_from,
-                    },
-                    Player {
-                        counter: self.players.1.counter,
-                        cards: remove_duplicated_to,
-                    },
-                );
-            }
-        }
-        println!(
-            "Cards player now has: {:?}",
-            get_values_of_cards(&self.players.0.cards)
-        );
-        println!(
-            "Cards NPC now has: {:?}",
-            get_values_of_cards(&self.players.1.cards)
-        );
         // TODO check if finished:
         // check if one has no cards left
         // if no, re play
         // if yes, subtract counts by number of jocker & open new game
         // if counts <= 0, the other win;
         // return play next round
-        return true;
+        if remove_duplicated_from.len() == 0 || remove_duplicated_to.len() == 0 {
+            //
+            println!("game end")
+        } else {
+            remove_duplicated_from.shuffle(&mut rng);
+            remove_duplicated_to.shuffle(&mut rng);
+
+            // update players
+            match player_draw {
+                true => {
+                    self.players = (
+                        Player {
+                            counter: self.players.0.counter,
+                            cards: remove_duplicated_to,
+                        },
+                        Player {
+                            counter: self.players.1.counter,
+                            cards: remove_duplicated_from,
+                        },
+                    );
+                }
+                false => {
+                    self.players = (
+                        Player {
+                            counter: self.players.0.counter,
+                            cards: remove_duplicated_from,
+                        },
+                        Player {
+                            counter: self.players.1.counter,
+                            cards: remove_duplicated_to,
+                        },
+                    );
+                }
+            }
+            println!(
+                "Cards player now has: {:?}",
+                get_values_of_cards(&self.players.0.cards)
+            );
+            println!(
+                "Cards NPC now has: {:?}",
+                get_values_of_cards(&self.players.1.cards)
+            );
+            match self.next_attack_player {
+                0 => self.next_attack_player = 1,
+                _ => self.next_attack_player = 0,
+            }
+            Hangman::play(self);
+        }
     }
 }
 
@@ -276,7 +286,7 @@ impl Play for Hangman {
                 // randomly select 1 card;
                 let mut rng: rand::rngs::ThreadRng = rand::thread_rng();
                 let selected_card_index = rng.gen_range(0..self.players.0.cards.len());
-                Hangman::draw(self, false, selected_card_index);
+                Hangman::draw(self, false, selected_card_index + 1);
             }
         }
     }
