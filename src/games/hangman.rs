@@ -126,6 +126,15 @@ impl Default for Hangman {
             index_of_first_action_player,
         );
 
+        println!(
+            "These are your cards: {:?}",
+            Hangman::get_values_of_cards(&player1_card)
+        );
+        println!(
+            "These are NPC's cards: {:?}",
+            Hangman::get_values_of_cards(&player2_card)
+        );
+
         return Hangman {
             jokers: default_jokers,
             cards: default_cards,
@@ -145,34 +154,25 @@ impl Default for Hangman {
     }
 }
 
-fn get_values_of_cards(cards: &Vec<PlayerCard>) -> Vec<String> {
-    let card_values: Vec<_> = cards
-        .into_iter()
-        .map(|x| match x.card_type {
-            CardType::Joker => String::from("Joker"),
-            CardType::Number => x.number.to_string(),
-        })
-        .collect();
-    return card_values;
-}
-
 impl Hangman {
     fn draw(&mut self, player_draw: bool, selected_index: usize) {
         let (from, to) = match player_draw {
             true => (&self.players.1.cards, &mut self.players.0.cards),
             false => (&self.players.0.cards, &mut self.players.1.cards),
         };
-        println!("from: {:?}", from);
+        let mut rng: rand::rngs::ThreadRng = rand::thread_rng();
+        let mut cloned_from = from.clone();
+        cloned_from.shuffle(&mut rng);
+        // println!("from: {:?}", from);
         println!("selected_index: {:?}", selected_index);
-        let new_card = from.get(selected_index - 1).unwrap();
+        let new_card = cloned_from.get(selected_index - 1).unwrap();
         to.push(PlayerCard {
             card_type: new_card.card_type,
             number: new_card.number,
         });
 
         // filter out the card + shuffle the card;
-        let updated_from: Vec<_> = from
-            .clone()
+        let updated_from: Vec<_> = cloned_from
             .into_iter()
             .enumerate()
             .filter_map(|(idx, card)| {
@@ -186,7 +186,6 @@ impl Hangman {
 
         // shuffle again
 
-        let mut rng: rand::rngs::ThreadRng = rand::thread_rng();
         let mut remove_duplicated_from = remove_cards_with_duplication(updated_from.to_vec());
         let mut remove_duplicated_to = remove_cards_with_duplication(to.to_vec());
 
@@ -281,12 +280,12 @@ impl Hangman {
                 }
             }
             println!(
-                "Cards player now has: {:?}",
-                get_values_of_cards(&self.players.0.cards)
+                "Cards player now has: {:?}\r\n",
+                Hangman::get_values_of_cards(&self.players.0.cards)
             );
             println!(
                 "Cards NPC now has: {:?}\r\n\r\n",
-                get_values_of_cards(&self.players.1.cards)
+                Hangman::get_values_of_cards(&self.players.1.cards)
             );
             match self.next_attack_player {
                 0 => self.next_attack_player = 1,
@@ -294,6 +293,17 @@ impl Hangman {
             }
             Hangman::play(self);
         }
+    }
+
+    fn get_values_of_cards(cards: &Vec<PlayerCard>) -> Vec<String> {
+        let card_values: Vec<_> = cards
+            .into_iter()
+            .map(|x| match x.card_type {
+                CardType::Joker => String::from("Joker"),
+                CardType::Number => x.number.to_string(),
+            })
+            .collect();
+        return card_values;
     }
 }
 
@@ -303,14 +313,7 @@ impl Play for Hangman {
         match self.next_attack_player {
             0 => {
                 println!("It's player's turn.\r\n");
-                println!(
-                    "Cards You have: {:?}",
-                    get_values_of_cards(&self.players.0.cards)
-                );
-
                 let npc_card_options = &self.players.1.cards;
-                println!("Cards NPC has: {:?}", get_values_of_cards(npc_card_options));
-
                 let npc_card_index_options = npc_card_options
                     .into_iter()
                     .enumerate()

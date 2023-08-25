@@ -1,7 +1,7 @@
 mod games;
 
 use games::{
-    game::{Game, GameName, GetPlayers},
+    game::{Game, GameName},
     hangman::Hangman,
 };
 use inquire::Select;
@@ -31,8 +31,5 @@ fn main() {
         }
     };
     let mut selected_game = selected_game.unwrap();
-    let players = selected_game.get_players();
-    println!("These are your cards: {:?}", players.0.cards);
-    println!("These are NPC's cards: {:?}", players.1.cards);
     selected_game.play()
 }

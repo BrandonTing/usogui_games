@@ -2,7 +2,7 @@ use std::fmt;
 
 use strum_macros::EnumIter;
 
-use super::hangman::{Hangman, Player};
+use super::hangman::Hangman;
 
 #[derive(EnumIter)]
 pub enum GameName {
@@ -30,20 +30,20 @@ pub enum Game {
     Hangman(Hangman),
 }
 
-pub trait GetPlayers {
-    fn get_players(&self) -> (&Player, &Player);
-}
+// pub trait GetPlayers {
+//     fn get_players(&self) -> (&Player, &Player);
+// }
 
-impl GetPlayers for Game {
-    fn get_players(&self) -> (&Player, &Player) {
-        match self {
-            Game::Hangman(hangman) => {
-                let (player1, player2) = &hangman.players;
-                return (player1, player2);
-            }
-        }
-    }
-}
+// impl GetPlayers for Game {
+//     fn get_players(&self) -> (&Player, &Player) {
+//         match self {
+//             Game::Hangman(hangman) => {
+//                 let (player1, player2) = &hangman.players;
+//                 return (player1, player2);
+//             }
+//         }
+//     }
+// }
 
 pub trait Play {
     fn play(&mut self) -> ();
