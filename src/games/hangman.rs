@@ -227,9 +227,9 @@ impl Hangman {
                     Hangman::play(self);
                 }
                 false => {
-                    println!("You lose......");
+                    println!("You lose......\r\n");
                     if self.players.0.counter <= joker_number {
-                        println!("You become HANGMAN");
+                        println!("You become HANGMAN\r\n");
                         return;
                     }
                     let counter: usize = self.players.0.counter - joker_number;
@@ -285,7 +285,7 @@ impl Hangman {
                 get_values_of_cards(&self.players.0.cards)
             );
             println!(
-                "Cards NPC now has: {:?}",
+                "Cards NPC now has: {:?}\r\n\r\n",
                 get_values_of_cards(&self.players.1.cards)
             );
             match self.next_attack_player {
@@ -297,12 +297,12 @@ impl Hangman {
     }
 }
 
-// TODO Draw cards
+//  Draw cards
 impl Play for Hangman {
     fn play(&mut self) {
         match self.next_attack_player {
             0 => {
-                println!("It's player's turn.");
+                println!("It's player's turn.\r\n");
                 println!(
                     "Cards You have: {:?}",
                     get_values_of_cards(&self.players.0.cards)
@@ -332,7 +332,7 @@ impl Play for Hangman {
             }
             // npc's turn draw random card
             _ => {
-                println!("It's NPC's turn.");
+                println!("It's NPC's turn.\r\n");
                 // randomly select 1 card;
                 let mut rng: rand::rngs::ThreadRng = rand::thread_rng();
                 let selected_card_index = rng.gen_range(0..self.players.0.cards.len());
